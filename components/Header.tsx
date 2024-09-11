@@ -3,7 +3,7 @@ import { GithubIcon, LinkedinIcon, GlobeIcon } from "lucide-react";
 export function Header() {
   return (
     <header className="bg-primary text-primary-foreground p-4 w-full">
-      <div className="container mx-auto max-w-3xl flex flex-col sm:flex-row justify-between items-center">
+      <div className="container mx-auto max-w-4xl flex flex-col sm:flex-row justify-between items-center">
         <h1 className="text-2xl font-bold mb-4 sm:mb-0">TinyURL</h1>
         <nav className="flex space-x-4">
           <a
