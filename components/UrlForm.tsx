@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -14,13 +15,14 @@ import { URLResponse } from "@/types/URL";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
+import { parseBackendDate } from "@/lib/dateUtils";
 
 interface UrlFormProps {
   handleCreateOrUpdateUrl: (
     id: string | null,
     longUrl: string,
     alias: string,
-    expiresAt: Date | undefined
+    expiresAt: Date | null
   ) => Promise<void>;
   editUrl?: URLResponse | null;
 }
@@ -29,14 +31,14 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [alias, setAlias] = useState("");
-  const [expiresAt, setExpiresAt] = useState<Date | undefined>(new Date());
+  const [expiresAt, setExpiresAt] = useState<Date | null>(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (editUrl) {
       setUrl(editUrl.url);
       setAlias(editUrl.alias);
-      setExpiresAt(editUrl.expiresAt ? new Date(editUrl.expiresAt) : undefined);
+      setExpiresAt(editUrl.expiresAt ? parseBackendDate(editUrl.expiresAt) : null);
       setIsOpen(true);
     }
   }, [editUrl]);
@@ -48,7 +50,7 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
         await handleCreateOrUpdateUrl(editUrl?.key || null, url, alias, expiresAt);
         setUrl("");
         setAlias("");
-        setExpiresAt(undefined);
+        setExpiresAt(null);
         setIsOpen(false);
       } catch (error) {
         console.error("Error creating/updating link:", error);
@@ -69,6 +71,9 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{editUrl ? "Editar link" : "Crear nuevo link corto"}</DialogTitle>
+          <DialogDescription>
+            {editUrl ? "Editar link" : "Crear nuevo link corto"}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <Input
@@ -94,7 +99,13 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={expiresAt} onSelect={setExpiresAt} initialFocus />
+              <Calendar
+                mode="single"
+                selected={expiresAt}
+                onSelect={setExpiresAt}
+                disabled={(date) => date < new Date()}
+                initialFocus
+              />
             </PopoverContent>
           </Popover>
           <Button onClick={handleSubmit} disabled={isLoading}>

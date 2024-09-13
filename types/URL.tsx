@@ -3,12 +3,12 @@ export interface URLResponse {
   url: string;
   alias: string;
   hit: number;
-  expiresAt: string | null;
-  createdAt: string;
+  createdAt: number[];
+  expiresAt: number[] | null;
 }
 
 export interface URLCreate {
   url: string;
   alias?: string;
-  expiresAt?: string;
+  expiresAt?: string | null;
 }

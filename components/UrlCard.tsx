@@ -15,6 +15,7 @@ import {
   PencilIcon,
 } from "lucide-react";
 import { URLResponse } from "@/types/URL";
+import { parseBackendDate } from "@/lib/dateUtils";
 import { format } from "date-fns";
 
 interface UrlCardProps {
@@ -25,8 +26,34 @@ interface UrlCardProps {
 }
 
 export function UrlCard({ url, onCopy, onDelete, onEdit }: UrlCardProps) {
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "PPpp");
+  // const parseDateArray = (dateArray: number[]): Date => {
+  //   const [year, month, day, hour = 0, minute = 0, second = 0, millisecond = 0] = dateArray;
+  //   return new Date(year, month - 1, day, hour, minute, second, millisecond);
+  // };
+
+  // function formatDate(date: number[]): string {
+  //   const parsedDate = parseDateArray(date);
+  //   const options: Intl.DateTimeFormatOptions = {
+  //     day: "numeric",
+  //     month: "long",
+  //     // year: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     timeZone: "America/Argentina/Buenos_Aires",
+  //   };
+  //   const formattedDate = parsedDate.toLocaleString("es-AR", options);
+  //   return formattedDate;
+  // }
+
+  const formatDate = (dateArray: number[] | null) => {
+    if (!dateArray) return "N/A";
+    try {
+      const date = parseBackendDate(dateArray);
+      return format(date, "PPpp");
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      return "Invalid Date";
+    }
   };
 
   return (

@@ -46,22 +46,24 @@ export function TinyURLApp() {
     key: string | null,
     url: string,
     alias: string,
-    expiresAt: Date | undefined
+    expiresAt: Date | null
   ) => {
     try {
       const urlData: URLCreate = {
         url,
         alias: alias || undefined,
-        expiresAt: expiresAt != undefined ? expiresAt.toISOString() : undefined,
+        expiresAt: expiresAt ? expiresAt.toISOString() : undefined,
       };
+
+      console.log("urlData", urlData);
 
       let updatedUrl: URLResponse;
       if (key) {
         updatedUrl = await updateURL(key, urlData);
-        setUrls(urls.map((url) => (url.key === key ? updatedUrl : url)));
+        // setUrls(urls.map((url) => (url.key === key ? updatedUrl : url)));
       } else {
         updatedUrl = await createURL(urlData);
-        setUrls([updatedUrl, ...urls]);
+        // setUrls([updatedUrl, ...urls]);
       }
       setEditUrl(null);
       toast({
