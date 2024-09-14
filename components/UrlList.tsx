@@ -1,6 +1,5 @@
 import { URLResponse } from "@/types/URL";
 import { UrlCard } from "./UrlCard";
-import { format } from "date-fns";
 
 interface UrlListProps {
   urls: URLResponse[];
@@ -19,7 +18,7 @@ export function UrlList({ urls, onCopy, onDelete, onEdit }: UrlListProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="space-y-4">
       {urls.map((url, index) => (
         <UrlCard key={index} url={url} onCopy={onCopy} onDelete={onDelete} onEdit={onEdit} />
       ))}

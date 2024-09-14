@@ -9,13 +9,14 @@ import { URLCreate, URLResponse } from "@/types/URL";
 import { createURL, deleteURL, getURLs, updateURL } from "@/api/URL.api";
 import { Toaster } from "./ui/toaster";
 import { useToast } from "@/hooks/use-toast";
+import { parseBackendDate } from "@/lib/dateUtils";
 
 export function TinyURLApp() {
   const [urls, setUrls] = useState<URLResponse[]>([]);
   const [editUrl, setEditUrl] = useState<URLResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast, dismiss } = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUrls();
@@ -55,15 +56,41 @@ export function TinyURLApp() {
         expiresAt: expiresAt ? expiresAt.toISOString() : undefined,
       };
 
-      console.log("urlData", urlData);
-
       let updatedUrl: URLResponse;
       if (key) {
-        updatedUrl = await updateURL(key, urlData);
-        // setUrls(urls.map((url) => (url.key === key ? updatedUrl : url)));
+        const urlDataUpdate: Partial<URLCreate> = {};
+        const originalUrl = urls.find((url) => url.key === key);
+
+        if (originalUrl?.alias !== alias) {
+          urlDataUpdate.alias = alias;
+        }
+        if (originalUrl?.url !== url) {
+          urlDataUpdate.url = url;
+        }
+
+        if (originalUrl?.expiresAt) {
+          const originalExpiresAt = parseBackendDate(originalUrl?.expiresAt);
+          if (originalExpiresAt.toISOString() !== expiresAt?.toISOString()) {
+            urlDataUpdate.expiresAt = expiresAt?.toISOString();
+          }
+        }
+
+        if (
+          urlDataUpdate.url === undefined &&
+          urlDataUpdate.alias === undefined &&
+          urlDataUpdate.expiresAt === undefined
+        ) {
+          setEditUrl(null);
+          return;
+        }
+
+        updatedUrl = await updateURL(key, urlDataUpdate);
+
+        console.log("updatedUrl", updatedUrl);
+        setUrls(urls.map((url) => (url.key === key ? updatedUrl : url)));
       } else {
         updatedUrl = await createURL(urlData);
-        // setUrls([updatedUrl, ...urls]);
+        setUrls([updatedUrl, ...urls]);
       }
       setEditUrl(null);
       toast({
@@ -100,8 +127,12 @@ export function TinyURLApp() {
     }
   };
 
-  const handleEditLink = (link: URLResponse) => {
-    setEditUrl(link);
+  const handleEditUrl = (url: URLResponse) => {
+    setEditUrl(url);
+  };
+
+  const handleSetEditUrlNull = () => {
+    setEditUrl(null);
   };
 
   const handleCopyToClipboard = (text: string) => {
@@ -116,7 +147,11 @@ export function TinyURLApp() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
-        <UrlForm handleCreateOrUpdateUrl={handleCreateOrUpdateUrl} editUrl={editUrl} />
+        <UrlForm
+          handleCreateOrUpdateUrl={handleCreateOrUpdateUrl}
+          editUrl={editUrl}
+          handleSetEditUrlNull={handleSetEditUrlNull}
+        />
         {isLoading ? (
           <p className="text-center">Cargando enlaces...</p>
         ) : error ? (
@@ -126,7 +161,7 @@ export function TinyURLApp() {
             urls={urls}
             onCopy={handleCopyToClipboard}
             onDelete={handleDeleteUrl}
-            onEdit={handleEditLink}
+            onEdit={handleEditUrl}
           />
         )}
       </main>

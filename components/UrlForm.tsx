@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { PlusIcon, Pencil } from "lucide-react";
 import { URLResponse } from "@/types/URL";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { parseBackendDate } from "@/lib/dateUtils";
 
@@ -25,9 +25,10 @@ interface UrlFormProps {
     expiresAt: Date | null
   ) => Promise<void>;
   editUrl?: URLResponse | null;
+  handleSetEditUrlNull: () => void;
 }
 
-export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
+export function UrlForm({ handleCreateOrUpdateUrl, editUrl, handleSetEditUrlNull }: UrlFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [alias, setAlias] = useState("");
@@ -60,15 +61,23 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
     }
   };
 
+  const handleOpen = () => {
+    setIsOpen(!isOpen);
+    setUrl("");
+    setAlias("");
+    setExpiresAt(null);
+    handleSetEditUrlNull();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         <Button className="w-full mb-8">
           {editUrl ? <Pencil className="mr-2 h-4 w-4" /> : <PlusIcon className="mr-2 h-4 w-4" />}
           {editUrl ? "Editar Link" : "Nuevo Link"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>{editUrl ? "Editar link" : "Crear nuevo link corto"}</DialogTitle>
           <DialogDescription>
@@ -77,15 +86,19 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <Input
-            placeholder="Pega tu URL aquí"
+            placeholder="https://"
             value={url}
+            disabled={editUrl !== null}
             onChange={(e) => setUrl(e.target.value)}
           />
-          <Input
-            placeholder="Alias (opcional)"
-            value={alias}
-            onChange={(e) => setAlias(e.target.value)}
-          />
+          <div className="flex gap-2">
+            <Input disabled value="tinyurl.alejoczombos.com.ar/" />
+            <Input
+              placeholder="Alias (opcional)"
+              value={alias}
+              onChange={(e) => setAlias(e.target.value)}
+            />
+          </div>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -101,8 +114,8 @@ export function UrlForm({ handleCreateOrUpdateUrl, editUrl }: UrlFormProps) {
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={expiresAt}
-                onSelect={setExpiresAt}
+                selected={expiresAt || undefined}
+                onSelect={(date) => (date ? setExpiresAt(date) : setExpiresAt(null))}
                 disabled={(date) => date < new Date()}
                 initialFocus
               />

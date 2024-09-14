@@ -8,7 +8,7 @@ export interface URLResponse {
 }
 
 export interface URLCreate {
-  url: string;
+  url?: string;
   alias?: string;
-  expiresAt?: string | null;
+  expiresAt?: string;
 }
