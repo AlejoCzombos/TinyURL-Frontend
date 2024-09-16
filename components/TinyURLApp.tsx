@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
 import { UrlForm } from "./UrlForm";
 import { UrlList } from "./UrlList";
 import { URLCreate, URLResponse } from "@/types/URL";
 import { createURL, deleteURL, getURLs, updateURL } from "@/api/URL.api";
-import { Toaster } from "./ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { parseBackendDate } from "@/lib/dateUtils";
 
@@ -144,29 +141,24 @@ export function TinyURLApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
-        <UrlForm
-          handleCreateOrUpdateUrl={handleCreateOrUpdateUrl}
-          editUrl={editUrl}
-          handleSetEditUrlNull={handleSetEditUrlNull}
+    <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+      <UrlForm
+        handleCreateOrUpdateUrl={handleCreateOrUpdateUrl}
+        editUrl={editUrl}
+        handleSetEditUrlNull={handleSetEditUrlNull}
+      />
+      {isLoading ? (
+        <p className="text-center">Cargando enlaces...</p>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : (
+        <UrlList
+          urls={urls}
+          onCopy={handleCopyToClipboard}
+          onDelete={handleDeleteUrl}
+          onEdit={handleEditUrl}
         />
-        {isLoading ? (
-          <p className="text-center">Cargando enlaces...</p>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : (
-          <UrlList
-            urls={urls}
-            onCopy={handleCopyToClipboard}
-            onDelete={handleDeleteUrl}
-            onEdit={handleEditUrl}
-          />
-        )}
-      </main>
-      <Footer />
-      <Toaster />
-    </div>
+      )}
+    </main>
   );
 }
