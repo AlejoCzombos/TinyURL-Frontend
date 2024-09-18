@@ -8,7 +8,7 @@ export default function RedirectPage({ params }: { params: { keyOrAlias: string 
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
         <Suspense fallback={<p>Cargando...</p>}>
-          <RedirectComponent alias={params.keyOrAlias} />
+          <RedirectComponent keyOrAlias={params.keyOrAlias} />
         </Suspense>
       </main>
       <Toaster />

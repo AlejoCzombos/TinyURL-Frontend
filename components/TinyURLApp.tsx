@@ -13,7 +13,7 @@ export function TinyURLApp() {
   const [editUrl, setEditUrl] = useState<URLResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   useEffect(() => {
     fetchUrls();
@@ -22,6 +22,12 @@ export function TinyURLApp() {
   const fetchUrls = async () => {
     try {
       setIsLoading(true);
+      toast({
+        title: "Despertando al servidor 😅",
+        description: "Estamos despertando al servidor para que puedas ver tus enlaces",
+        variant: "default",
+        duration: Infinity,
+      });
       const response = await getURLs();
       if (!response.ok) {
         throw new Error("Failed to fetch links");
@@ -36,6 +42,7 @@ export function TinyURLApp() {
         variant: "destructive",
       });
     } finally {
+      dismiss();
       setIsLoading(false);
     }
   };
